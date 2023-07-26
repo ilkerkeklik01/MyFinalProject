@@ -1,4 +1,5 @@
-﻿using DataAccess.Abstract;
+﻿using Core.DataAccess.EntityFramework;
+using DataAccess.Abstract;
 using Entities.Concrete;
 using System;
 using System.Collections.Generic;
@@ -9,31 +10,8 @@ using System.Threading.Tasks;
 
 namespace DataAccess.Concrete.EntityFramework
 {
-    internal class EfCustomerDal : ICustomerDal
+    internal class EfCustomerDal : EfEntityRepositoryBase<Customer, NorthwindContext>,ICustomerDal
     {
-        public void Add(Customer entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Delete(Customer entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Customer> GetAll(Expression<Func<Customer, bool>> filter = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Customer GetValue(Expression<Func<Customer, bool>> filter)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(Customer entity)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }
