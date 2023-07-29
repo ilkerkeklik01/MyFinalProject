@@ -1,5 +1,8 @@
+using Autofac.Extensions.DependencyInjection;
+using Autofac;
 using Business.Abstract;
 using Business.Concrete;
+using Business.DependencyResolvers.Autofac;
 using DataAccess.Abstract;
 using DataAccess.Concrete.EntityFramework;
 
@@ -12,12 +15,20 @@ namespace WebAPI
             var builder = WebApplication.CreateBuilder(args);
 
 
+            //warning 
+            //https://stackoverflow.com/questions/69754985/adding-autofac-to-net-core-6-0-using-the-new-single-file-template
+            builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
+    .ConfigureContainer<ContainerBuilder>(builder =>
+    {
+        builder.RegisterModule(new AutofacBusinessModule());
+    });
 
             //Autofac,Ninject,CastleWindsor,StructureMap,LightInject,DryInject -->IoC Container
             //AOP
             //warning Startup.cs                 /----------------\ IProductService nesnesine new ProductManager() bagla
-            builder.Services.AddSingleton<IProductService, ProductManager>();
-            builder.Services.AddSingleton<IProductDal,EfProductDal>();
+
+            //builder.Services.AddSingleton<IProductService, ProductManager>();
+            //builder.Services.AddSingleton<IProductDal,EfProductDal>();
 
             // Add services to the container.
 
