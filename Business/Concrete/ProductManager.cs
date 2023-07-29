@@ -47,7 +47,7 @@ namespace Business.Concrete
             //business codes
             //is it has authorization?
 
-            if (DateTime.Now.Hour == 19)
+            if (DateTime.Now.Hour == 1)
             {
                 return new ErrorDataResult<List<Product>>(Messages.MaintenanceTime);
             }
@@ -79,10 +79,10 @@ namespace Business.Concrete
 
         public IDataResult<List<ProductDetailDTO>> GetProductDetails()
         {
-            if (DateTime.Now.Hour == 19)
-            {
-                return new ErrorDataResult<List<ProductDetailDTO>>(Messages.MaintenanceTime);
-            }
+            //if (DateTime.Now.Hour == 19)
+            //{
+            //    return new ErrorDataResult<List<ProductDetailDTO>>(Messages.MaintenanceTime);
+            //}
 
             return new SuccessDataResult<List<ProductDetailDTO>>(_productDal.GetProductDetails());
         }
