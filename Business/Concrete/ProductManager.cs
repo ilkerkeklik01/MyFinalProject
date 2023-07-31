@@ -3,8 +3,10 @@ using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
+using Core.Utilities.Business;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
+using DataAccess.Concrete.EntityFramework;
 using DataAccess.Concrete.InMemory;
 using Entities.Concrete;
 using Entities.DTOs;
@@ -22,13 +24,15 @@ namespace Business.Concrete
 
         //Connect with abstract class
         IProductDal _productDal;
+        ICategoryService _categoryService;
         
         //when the software needs to change the type of ProductDal
         //IT is the easiest way to implement like this
         //just give the parameter that implements IProductDal
-        public ProductManager(IProductDal productDal)
+        public ProductManager(IProductDal productDal,ICategoryService categoryService)
         {
             _productDal = productDal;
+            _categoryService = categoryService;
         }
 
         //warning
@@ -41,11 +45,22 @@ namespace Business.Concrete
 
             //warning
             //ValidationTool.Validate(new ProductValidator(),product);
+            //Eğer mevcut kategori sayısı 15 i geçtiyse sisteme yeni ürün eklenemez!
 
 
+            IResult result = BusinessRules.Run(CheckIfProductNameNotRepeated(product.ProductName),
+                CheckIfProductCountOfCategoryCorrect(product.CategoryId),
+                CheckIfCategoryLimitExceded()
+                );
+
+
+
+            if(result != null)
+            {
+                return result;
+            }
 
             _productDal.Add(product);
-
             return new SuccessResult(Messages.ProductAddedMessage);
 
         }
@@ -93,6 +108,50 @@ namespace Business.Concrete
             //}
 
             return new SuccessDataResult<List<ProductDetailDTO>>(_productDal.GetProductDetails());
+        }
+
+
+        [ValidationAspect(typeof(ProductValidator))]
+
+        public IResult Update(Product product)
+        {
+            BusinessRules.Run(CheckIfProductNameNotRepeated(product.ProductName),
+                CheckIfProductCountOfCategoryCorrect(product.CategoryId)
+                );
+
+            _productDal.Update(product);
+            return new SuccessResult(Messages.ProductAddedMessage);
+        }
+
+
+        private IResult CheckIfProductCountOfCategoryCorrect(int categoryId)
+        {
+            var result = _productDal.GetAll(p => p.CategoryId == categoryId).Count;
+
+            if (result >= 10)
+            {
+                return new ErrorResult(Messages.ProductCountOfCategoryError);
+            }
+            else return new SuccessResult();
+
+        }
+        private IResult CheckIfProductNameNotRepeated(string productName)
+        {
+            var result = _productDal.GetAll(p=>p.ProductName == productName).Any();
+
+            if (result) return new ErrorResult(Messages.ProductNameRepeatedError);
+            
+            return new SuccessResult();
+
+        }
+
+        private IResult CheckIfCategoryLimitExceded()
+        {
+            var result = _categoryService.GetAll();
+            if(result.Data.Count > 15) {
+                return new ErrorResult(Messages.CategoryLimitOverflow);
+            }
+            return new SuccessResult();
         }
 
     }
